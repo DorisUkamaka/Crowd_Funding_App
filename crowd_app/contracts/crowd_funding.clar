@@ -126,5 +126,27 @@
   )
 )
 
+(define-public (claim-funds (campaign-id uint))
+  (let
+    (
+      (campaign (unwrap! (map-get? campaigns { campaign-id: campaign-id }) (err err-not-found)))
+    )
+    (asserts! (is-eq (get owner campaign) tx-sender) (err err-owner-only))
+    (asserts! (>= (current-time) (get deadline campaign)) (err err-deadline-passed))
+    (asserts! (>= (get raised campaign) (get goal campaign)) (err err-goal-not-reached))
+    (asserts! (not (get claimed campaign)) (err err-already-claimed))
+    (match (as-contract (stx-transfer? (get raised campaign) tx-sender (get owner campaign)))
+      success
+        (begin
+          (map-set campaigns
+            { campaign-id: campaign-id }
+            (merge campaign { claimed: true })
+          )
+          (ok true)
+        )
+      error (err err-transfer-failed)
+    )
+  )
+)
 
 
