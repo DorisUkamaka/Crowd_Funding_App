@@ -32,6 +32,9 @@
   { campaign-id: uint }
   { description: (string-utf8 500) })
 
+(define-private (current-time)
+  (unwrap-panic (get-block-info? time u0)))
+
 
 ;; Variables
 (define-data-var campaign-nonce uint u0)
@@ -43,4 +46,9 @@
 
 (define-read-only (get-contribution (campaign-id uint) (contributor principal))
   (map-get? contributions { campaign-id: campaign-id, contributor: contributor }))
-  
+
+(define-read-only (get-total-campaigns)
+  (var-get campaign-nonce))
+
+
+
