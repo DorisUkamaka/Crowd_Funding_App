@@ -76,4 +76,27 @@
 (define-read-only (get-campaign-description (campaign-id uint))
   (map-get? campaign-descriptions { campaign-id: campaign-id }))
 
+;; Public Functions
+(define-public (create-campaign (goal uint) (deadline uint))
+  (let
+    (
+      (campaign-id (var-get campaign-nonce))
+    )
+    (asserts! (> goal u0) (err err-invalid-amount))
+    (asserts! (> deadline (current-time)) (err err-deadline-passed))
+    (map-insert campaigns
+      { campaign-id: campaign-id }
+      {
+        owner: tx-sender,
+        goal: goal,
+        raised: u0,
+        deadline: deadline,
+        claimed: false
+      }
+    )
+    (var-set campaign-nonce (+ campaign-id u1))
+    (ok campaign-id)
+  )
+)
+
 
