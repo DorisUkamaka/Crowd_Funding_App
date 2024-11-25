@@ -35,3 +35,12 @@
 
 ;; Variables
 (define-data-var campaign-nonce uint u0)
+
+
+  ;; Read-only Functions
+(define-read-only (get-campaign-details (campaign-id uint))
+  (map-get? campaigns { campaign-id: campaign-id }))
+
+(define-read-only (get-contribution (campaign-id uint) (contributor principal))
+  (map-get? contributions { campaign-id: campaign-id, contributor: contributor }))
+  
