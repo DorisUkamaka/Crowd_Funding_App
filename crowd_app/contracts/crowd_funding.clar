@@ -149,4 +149,23 @@
   )
 )
 
+(define-public (refund (campaign-id uint))
+  (let
+    (
+      (campaign (unwrap! (map-get? campaigns { campaign-id: campaign-id }) (err err-not-found)))
+      (contribution (unwrap! (map-get? contributions { campaign-id: campaign-id, contributor: tx-sender }) (err err-not-found)))
+    )
+    (asserts! (>= (current-time) (get deadline campaign)) (err err-deadline-passed))
+    (asserts! (< (get raised campaign) (get goal campaign)) (err err-goal-not-reached))
+    (match (as-contract (stx-transfer? (get amount contribution) tx-sender tx-sender))
+      success
+        (begin
+          (map-delete contributions { campaign-id: campaign-id, contributor: tx-sender })
+          (ok true)
+        )
+      error (err err-transfer-failed)
+    )
+  )
+)
+
 
